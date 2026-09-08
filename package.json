@@ -32,5 +32,11 @@
     "postcss": "^8.5",
     "tailwindcss": "^4.3.3",
     "typescript": "5.7.3"
+  },
+  "overrides": {
+    "@img/sharp-wasm32": "npm:noop2@2.0.0"
+  },
+  "resolutions": {
+    "@img/sharp-wasm32": "npm:noop2@2.0.0"
   }
 }
