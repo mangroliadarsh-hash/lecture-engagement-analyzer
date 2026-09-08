@@ -6,9 +6,23 @@ const minutesAgo = (m: number) =>
 
 export const initialStudentQuestions: StudentQuestion[] = [
   {
+    id: "sq-0",
+    lectureId: "ml-07",
+    timestamp: s("17:15"),
+    topic: "Gradient Descent",
+    question: "Why does the learning rate affect convergence?",
+    transcriptExcerpt:
+      "w becomes w minus alpha times the gradient. Alpha is the learning rate. The gradient tells us which direction increases the loss, so we go the opposite way.",
+    aiExplanation:
+      "Based on this lecture: the learning rate (alpha) controls the step size along the gradient descent direction. If alpha is too large, steps overshoot the minimum valley causing divergence; if too small, convergence takes excessive epochs.",
+    status: "new",
+    submittedAt: minutesAgo(5),
+    studentName: "Maya L.",
+  },
+  {
     id: "sq-1",
     lectureId: "ml-07",
-    timestamp: s("17:22"),
+    timestamp: s("17:15"),
     topic: "Gradient Descent",
     question: "Why do we subtract the gradient instead of adding it?",
     transcriptExcerpt:

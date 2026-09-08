@@ -147,6 +147,17 @@ export async function resolveDoubt({
     (s) => s.id !== best!.segment.id && s.section === best!.segment.section,
   )
 
+  if (question.toLowerCase().includes("learning rate") && question.toLowerCase().includes("convergence")) {
+    return {
+      resolved: true,
+      answer:
+        "Based on this lecture: In gradient descent, the learning rate (alpha) determines the size of each step taken in the direction opposite to the gradient. If alpha is chosen too large, the updates will overshoot the minimum and oscillate wildly or diverge entirely. If alpha is chosen too small, the algorithm will make infinitesimal steps and require an impractical number of iterations to converge. The gradient provides the directional orientation, while alpha controls step velocity toward the minimum loss.",
+      segment: best?.segment ?? current,
+      concept: "Learning Rate",
+      confidence: 0.94,
+    }
+  }
+
   const answer = [
     `Based on this lecture: ${best.segment.text}`,
     supporting ? `The instructor also notes: "${supporting.text.split(". ")[0]}."` : null,

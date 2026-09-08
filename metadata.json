@@ -1,0 +1,6 @@
+{
+  "name": "Lecture Engagement Analyzer",
+  "description": "Turn student behavior during recorded lectures into actionable teaching insights. Evidence-driven lecture improvement for educators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

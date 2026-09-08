@@ -38,11 +38,11 @@ const hotspots: Hotspot[] = [
   },
   {
     id: "h-1715",
-    start: s("17:00"),
+    start: s("17:15"),
     end: s("18:10"),
     peak: s("17:15"),
     topic: "Gradient Descent",
-    label: "Re-watch spike",
+    label: "Re-watch spike + major confusion",
     primarySignal: "rewatch",
     severity: "high",
     questionCount: 19,
@@ -54,20 +54,20 @@ const hotspots: Hotspot[] = [
       concepts: ["Gradient Descent", "Optimization", "Learning Rate"],
       prerequisites: ["Derivatives", "Functions", "Basic Algebra"],
       rationale:
-        "High difficulty detected because the segment introduces multiple new concepts within a short time window and assumes familiarity with derivatives.",
-      confidence: 0.91,
+        "Multiple new concepts are introduced within a short time window, while learner interaction signals indicate increased friction.",
+      confidence: 0.93,
     },
     evidence: [
       { signal: "questions", label: "19 related questions" },
       { signal: "rewatch", label: "34% re-watch increase" },
       { signal: "engagement", label: "12% engagement decline" },
-      { signal: "difficulty", label: "High AI-estimated difficulty (82/100)" },
+      { signal: "difficulty", label: "AI-estimated difficulty: 82/100" },
       { signal: "difficulty", label: "Multiple prerequisite concepts detected" },
     ],
     interpretation:
-      "Students repeatedly replay the moment the update rule is written on screen. Their questions center on why the gradient points \"downhill\" and how the learning rate controls step size, which suggests the geometric intuition was not established before the formula appeared.",
+      "Multiple independent signals indicate increased learner friction around this section.",
     recommendation:
-      "Add a visual explanation of Gradient Descent (a ball rolling down a loss surface) and a 60-second recap of derivatives before introducing the update rule.",
+      "Add a visual explanation of Gradient Descent and briefly recap the prerequisite concepts.",
     confidence: 0.93,
   },
   {
@@ -222,7 +222,7 @@ const clusters: QuestionCluster[] = [
   {
     id: "c-2",
     hotspotId: "h-1715",
-    start: s("17:00"),
+    start: s("17:15"),
     end: s("18:10"),
     topic: "Gradient Descent",
     concept: "Update rule intuition",
@@ -230,9 +230,8 @@ const clusters: QuestionCluster[] = [
     severity: "high",
     representative: [
       "Why does the learning rate affect convergence?",
-      "Why do we subtract the gradient instead of adding it?",
-      "What does the derivative have to do with finding the minimum?",
-      "Where do the initial weights come from?",
+      "Why can't we increase the learning rate indefinitely?",
+      "How does gradient descent know which direction to move?",
     ],
   },
   {
@@ -301,21 +300,30 @@ const recommendations: Recommendation[] = [
     hotspotId: "h-1715",
     timestamp: s("17:15"),
     action: "Add a visual explanation of Gradient Descent",
-    problem: "Update rule shown before geometric intuition",
+    problem: "High re-watch activity + question cluster",
     evidence: "34% re-watch increase + 19 related questions",
     priority: "High",
   },
   {
     id: "r-2",
     hotspotId: "h-1715",
-    timestamp: s("17:00"),
-    action: "Insert a 60-second derivatives recap",
-    problem: "Prerequisite gap detected",
-    evidence: "Multiple prerequisite concepts + high AI-estimated difficulty",
+    timestamp: s("17:15"),
+    action: "Add a prerequisite recap",
+    problem: "Multiple prerequisite concepts detected",
+    evidence: "Derivatives, Functions, and Basic Algebra prerequisites introduced simultaneously",
     priority: "High",
   },
   {
     id: "r-3",
+    hotspotId: "h-1715",
+    timestamp: s("17:15"),
+    action: "Add a concrete example",
+    problem: "High AI-estimated difficulty",
+    evidence: "AI-estimated difficulty 82/100 with dense mathematical update rule",
+    priority: "Medium",
+  },
+  {
+    id: "r-4",
     hotspotId: "h-2431",
     timestamp: s("24:31"),
     action: "Motivate the loss function with a single prediction first",
@@ -324,7 +332,7 @@ const recommendations: Recommendation[] = [
     priority: "High",
   },
   {
-    id: "r-4",
+    id: "r-5",
     hotspotId: "h-2431",
     timestamp: s("24:40"),
     action: "Expand the MSE summation for three data points",
@@ -333,7 +341,7 @@ const recommendations: Recommendation[] = [
     priority: "Medium",
   },
   {
-    id: "r-5",
+    id: "r-6",
     hotspotId: "h-3208",
     timestamp: s("32:08"),
     action: "Show side-by-side learning rate animations",
@@ -342,7 +350,7 @@ const recommendations: Recommendation[] = [
     priority: "Medium",
   },
   {
-    id: "r-6",
+    id: "r-7",
     hotspotId: "h-0842",
     timestamp: s("08:42"),
     action: "Add a worked example of memorization vs. generalization",
@@ -351,7 +359,7 @@ const recommendations: Recommendation[] = [
     priority: "Medium",
   },
   {
-    id: "r-7",
+    id: "r-8",
     hotspotId: "h-4152",
     timestamp: s("41:52"),
     action: "Define the L2 norm in plain language before the penalty term",
@@ -360,7 +368,7 @@ const recommendations: Recommendation[] = [
     priority: "Medium",
   },
   {
-    id: "r-8",
+    id: "r-9",
     hotspotId: "h-5120",
     timestamp: s("51:20"),
     action: "Share the confusion matrix slide as a download",
@@ -454,14 +462,14 @@ const rawTranscript = [
   {
     id: "t-11",
     start: s("15:30"),
-    end: s("17:00"),
+    end: s("17:15"),
     section: "Linear Regression",
     text:
       "The weights w and the bias b are the parameters. They start out random, which means the first predictions are garbage. Learning is the process of nudging them until the predictions stop being garbage.",
   },
   {
     id: "t-12",
-    start: s("17:00"),
+    start: s("17:15"),
     end: s("18:10"),
     section: "Gradient Descent",
     text:
@@ -661,10 +669,11 @@ export const lecture07 = defineLecture({
   clusters,
   recommendations,
   concepts: [
-    { name: "L2 Regularization", score: 88, hotspotId: "h-4152" },
     { name: "Gradient Descent", score: 82, hotspotId: "h-1715" },
-    { name: "Mean Squared Error", score: 76, hotspotId: "h-2431" },
     { name: "Learning Rate", score: 68, hotspotId: "h-3208" },
+    { name: "Optimization", score: 79, hotspotId: "h-1715" },
+    { name: "L2 Regularization", score: 88, hotspotId: "h-4152" },
+    { name: "Mean Squared Error", score: 76, hotspotId: "h-2431" },
     { name: "Train/Test Split", score: 61, hotspotId: "h-0842" },
     { name: "Precision & Recall", score: 57, hotspotId: "h-5120" },
   ],
