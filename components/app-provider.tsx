@@ -42,7 +42,7 @@ interface AppState {
   authenticated: boolean
   authChecked: boolean
   authInitializing: boolean
-  login: (user: AuthUser) => void
+  login: (user: AuthUser, rememberMe?: boolean) => void
   logout: () => void
 
   // Lectures & Unified Store
@@ -121,11 +121,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const login = React.useCallback((u: AuthUser) => {
+  const login = React.useCallback((u: AuthUser, rememberMe: boolean = true) => {
     setIsLoggedIn(true)
     setUser(u)
     try {
-      saveUser(u, true)
+      saveUser(u, rememberMe)
     } catch {
       // Storage access blocked or restricted
     }

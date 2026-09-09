@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
-import { FileSpreadsheet, Menu, Sparkles } from "lucide-react"
+import { FileSpreadsheet, LogOut, Menu, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SidebarNav } from "./sidebar-nav"
@@ -10,14 +10,19 @@ import { LectureSelector } from "./lecture-selector"
 import { NAV_ITEMS } from "./nav-items"
 import { useApp } from "@/components/app-provider"
 import { LoginView } from "@/components/auth/login-view"
-import { DEMO_USER } from "@/lib/auth"
+import { DEMO_USER, type AuthUser } from "@/lib/auth"
 import { cn } from "cn"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const [loggedIn, setLoggedIn] = React.useState(false)
   const pathname = usePathname()
-  const { dataSource, login } = useApp()
+  const { dataSource, login, logout, isLoggedIn, user, authInitializing } = useApp()
+  const [loggedIn, setLoggedIn] = React.useState(isLoggedIn)
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+
+  // Keep loggedIn in sync with context isLoggedIn (handles page refresh & logout)
+  React.useEffect(() => {
+    setLoggedIn(isLoggedIn)
+  }, [isLoggedIn])
 
   // Keyboard Escape listener to close mobile menu
   React.useEffect(() => {
@@ -46,10 +51,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!loggedIn) {
     return (
       <LoginView
-        onLoginSuccess={() => {
+        setLoggedIn={setLoggedIn}
+        onLoginSuccess={(authUser, rememberMe) => {
           setLoggedIn(true)
           try {
-            login?.(DEMO_USER)
+            login?.(authUser || DEMO_USER, rememberMe ?? true)
           } catch {
             // ignore
           }
@@ -143,6 +149,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           {!isStudentView && <LectureSelector className="max-w-[16rem] sm:max-w-xs" />}
+
+          {/* Quick User & Logout in Header */}
+          <div className="flex items-center gap-2 pl-2 border-l border-border">
+            <div className="hidden items-center gap-2 xl:flex">
+              <div className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">
+                {user?.avatar || "PR"}
+              </div>
+              <span className="text-xs font-medium text-foreground max-w-[120px] truncate">
+                {user?.name || "Dr. Priya Raman"}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => {
+                logout()
+                setLoggedIn(false)
+              }}
+              title="Sign out"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              aria-label="Sign out"
+            >
+              <LogOut className="size-3.5" />
+            </Button>
+          </div>
         </header>
 
         <main className="flex-1 px-4 py-6 md:px-6 lg:px-8 max-w-7xl w-full mx-auto">

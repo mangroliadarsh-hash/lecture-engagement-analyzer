@@ -14,16 +14,42 @@ import {
   Waves,
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
+import { DEMO_USER, type AuthUser } from "@/lib/auth"
 
 interface LoginViewProps {
-  onLoginSuccess: () => void
+  onLoginSuccess?: (user?: AuthUser, rememberMe?: boolean) => void
+  setLoggedIn?: (loggedIn: boolean) => void
 }
 
-export function LoginView({ onLoginSuccess }: LoginViewProps) {
+export function LoginView({ onLoginSuccess, setLoggedIn: setParentLoggedIn }: LoginViewProps) {
+  const [loggedIn, setLoggedIn] = React.useState(false)
   const [email, setEmail] = React.useState("professor@demo.com")
   const [password, setPassword] = React.useState("demo123")
   const [showPassword, setShowPassword] = React.useState(false)
   const [rememberMe, setRememberMe] = React.useState(true)
+
+  // Construct user object based on entered email
+  const getActiveUser = (): AuthUser => {
+    const activeEmail = email.trim() || "professor@demo.com"
+    if (activeEmail.toLowerCase() === "professor@demo.com") {
+      return DEMO_USER
+    }
+    const namePart = activeEmail.split("@")[0].replace(/[._-]/g, " ")
+    const formattedName = namePart
+      ? namePart
+          .split(" ")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ")
+      : "Instructor"
+
+    return {
+      id: "instructor-" + activeEmail.replace(/[^a-zA-Z0-9]/g, ""),
+      email: activeEmail,
+      name: `Prof. ${formattedName}`,
+      title: "Instructor · Higher Education",
+      avatar: (activeEmail.charAt(0) + (activeEmail.slice(1, 2) || "I")).toUpperCase(),
+    }
+  }
 
   // Direct React click handler: Switch directly from Login to Dashboard
   const handleEnterDashboard = (e?: React.MouseEvent | React.FormEvent) => {
@@ -31,7 +57,10 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
       e.preventDefault()
       e.stopPropagation()
     }
-    onLoginSuccess()
+    const userToLogin = getActiveUser()
+    setLoggedIn(true)
+    setParentLoggedIn?.(true)
+    onLoginSuccess?.(userToLogin, rememberMe)
   }
 
   // Direct React click handler: Switch directly from Login to Dashboard
@@ -40,7 +69,11 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
       e.preventDefault()
       e.stopPropagation()
     }
-    onLoginSuccess()
+    setEmail("professor@demo.com")
+    setPassword("demo123")
+    setLoggedIn(true)
+    setParentLoggedIn?.(true)
+    onLoginSuccess?.(DEMO_USER, true)
   }
 
   const handleFillDemo = (e?: React.MouseEvent) => {
@@ -162,7 +195,11 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
             <button
               type="button"
               id="enter-dashboard-btn"
-              onClick={handleEnterDashboard}
+              onClick={(e) => {
+                e?.preventDefault()
+                setLoggedIn(true)
+                handleEnterDashboard(e)
+              }}
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 px-4 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring select-none"
             >
               <span>Enter Dashboard</span>
@@ -183,7 +220,11 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
             <button
               type="button"
               id="continue-as-demo-btn"
-              onClick={handleContinueAsDemo}
+              onClick={(e) => {
+                e?.preventDefault()
+                setLoggedIn(true)
+                handleContinueAsDemo(e)
+              }}
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/5 py-2.5 px-4 text-xs font-semibold text-primary hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring select-none"
             >
               <Sparkles className="size-4 text-primary" />

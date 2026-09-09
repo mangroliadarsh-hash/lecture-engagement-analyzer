@@ -47,8 +47,14 @@ export function saveUser(user: AuthUser, rememberMe: boolean = true): void {
   if (typeof window === "undefined") return
   try {
     const data = JSON.stringify(user)
-    if (typeof window.localStorage !== "undefined" && window.localStorage) {
-      window.localStorage.setItem(STORAGE_KEY, data)
+    if (rememberMe) {
+      if (typeof window.localStorage !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(STORAGE_KEY, data)
+      }
+    } else {
+      if (typeof window.localStorage !== "undefined" && window.localStorage) {
+        window.localStorage.removeItem(STORAGE_KEY)
+      }
     }
     if (typeof window.sessionStorage !== "undefined" && window.sessionStorage) {
       window.sessionStorage.setItem(STORAGE_KEY, data)
