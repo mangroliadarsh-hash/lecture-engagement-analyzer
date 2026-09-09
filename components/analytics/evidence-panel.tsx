@@ -10,7 +10,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { DifficultyBadge, SeverityBadge, SignalBadge } from "@/components/shared/signal-badge"
 import { ConfidenceMeter } from "@/components/shared/confidence-meter"
 import { SIGNALS } from "@/lib/signals"
-import { formatRange } from "@/lib/format"
+import { formatRange, formatTime } from "@/lib/format"
 import type { Hotspot, QuestionCluster, Recommendation } from "@/lib/data"
 
 function Section({

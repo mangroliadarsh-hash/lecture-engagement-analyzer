@@ -145,11 +145,13 @@ export function generateSyntheticTimeline(
     const clampedDifficulty = Math.max(20, Math.min(99, Math.round(difficultyScore)))
 
     points.push({
+      t,
       time: t,
       timestamp: formatTime(t),
       engagement: clampedEngagement,
       students: currentActiveStudents,
       rewatch: clampedRewatch,
+      pauses: Math.max(1, Math.min(30, Math.round(clampedRewatch * 0.4))),
       confusion: clampedConfusion,
       questions: questionSpike,
       dropoff: dropoffCount,

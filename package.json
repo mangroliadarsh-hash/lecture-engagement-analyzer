@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -35,9 +35,6 @@
     "typescript": "5.7.3"
   },
   "overrides": {
-    "@img/sharp-wasm32": "npm:noop2@2.0.0"
-  },
-  "resolutions": {
     "@img/sharp-wasm32": "npm:noop2@2.0.0"
   }
 }

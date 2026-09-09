@@ -153,7 +153,7 @@ export function EngagementTimeline({
     return out
   }, [durationSec])
 
-  const handleClick = (state: { activePayload?: { payload: TimelinePoint }[] }) => {
+  const handleClick = (state: any) => {
     const point = state?.activePayload?.[0]?.payload
     if (point && onSelectTimestamp) onSelectTimestamp(point.t)
   }

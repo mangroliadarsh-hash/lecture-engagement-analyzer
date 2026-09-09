@@ -24,6 +24,9 @@ export interface TimelinePoint {
   difficulty: number
   confusion: number
   dropoff: number
+  topic?: string
+  timestamp?: string
+  time?: number
 }
 
 export interface TranscriptSegment {

@@ -8,6 +8,7 @@ import {
   Check,
   Flame,
   Lightbulb,
+  LogOut,
   MessageSquare,
   RotateCcw,
   Sparkles,

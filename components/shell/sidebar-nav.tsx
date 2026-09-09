@@ -63,8 +63,9 @@ export function SidebarNav({
               {group.label}
             </p>
             {NAV_ITEMS.filter((i) => i.group === group.key).map((item) => {
+              const currentPath = pathname || "/"
               const active =
-                item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
+                item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href)
               const Icon = item.icon
               return (
                 <Link

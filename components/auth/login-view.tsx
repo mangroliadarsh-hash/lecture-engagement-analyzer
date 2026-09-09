@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import {
   Activity,
   ArrowRight,
@@ -14,80 +13,40 @@ import {
   Sparkles,
   Waves,
 } from "lucide-react"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { DEMO_USER, saveUser, type AuthUser } from "@/lib/auth"
 
 interface LoginViewProps {
-  onLoginSuccess: (user: AuthUser) => void
+  onLoginSuccess: () => void
 }
 
 export function LoginView({ onLoginSuccess }: LoginViewProps) {
-  const router = useRouter()
   const [email, setEmail] = React.useState("professor@demo.com")
   const [password, setPassword] = React.useState("demo123")
   const [showPassword, setShowPassword] = React.useState(false)
   const [rememberMe, setRememberMe] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
 
-  // Proper React submit handler
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-
-    const cleanEmail = email.trim()
-    const cleanPassword = password.trim()
-
-    if (!cleanEmail) {
-      setError("Please enter your academic email address.")
-      return
+  // Direct React click handler: Switch directly from Login to Dashboard
+  const handleEnterDashboard = (e?: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
     }
-    if (!cleanPassword) {
-      setError("Please enter your password.")
-      return
-    }
-
-    const isDemoEmail = cleanEmail.toLowerCase() === "professor@demo.com"
-    const isDemoPassword = cleanPassword === "demo123"
-
-    if (!isDemoEmail || !isDemoPassword) {
-      setError("Invalid demo credentials. Use professor@demo.com / demo123")
-      return
-    }
-
-    const user: AuthUser = {
-      ...DEMO_USER,
-      email: cleanEmail,
-    }
-
-    // Persist authenticated state in localStorage
-    saveUser(user, rememberMe)
-    toast.success(`Welcome back, ${user.name}!`)
-    onLoginSuccess(user)
-    router.push("/")
+    onLoginSuccess()
   }
 
-  // Populate demo credentials
-  const handleFillDemo = () => {
-    setEmail("professor@demo.com")
-    setPassword("demo123")
-    setError(null)
-    toast.info("Demo credentials filled: professor@demo.com / demo123")
+  // Direct React click handler: Switch directly from Login to Dashboard
+  const handleContinueAsDemo = (e?: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    onLoginSuccess()
   }
 
-  // Quick action: Continue as Demo Instructor immediately
-  const handleContinueAsDemo = () => {
+  const handleFillDemo = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault()
     setEmail("professor@demo.com")
     setPassword("demo123")
-    setError(null)
-
-    const user: AuthUser = { ...DEMO_USER }
-    saveUser(user, true)
-    toast.success(`Welcome back, ${user.name}!`)
-    onLoginSuccess(user)
-    router.push("/")
   }
 
   return (
@@ -119,18 +78,7 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
             </p>
           </div>
 
-          {error && (
-            <div
-              id="login-error-alert"
-              role="alert"
-              className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs font-medium text-destructive flex items-start gap-2"
-            >
-              <span className="font-semibold shrink-0">Error:</span>
-              <span>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleEnterDashboard} className="space-y-4">
             {/* Email Field */}
             <div className="space-y-1.5">
               <label
@@ -142,18 +90,14 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
+                <input
                   id="login-email"
                   type="email"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value)
-                    if (error) setError(null)
-                  }}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="professor@demo.com"
-                  className="pl-9 text-sm"
+                  className="h-9 w-full rounded-lg border border-input bg-background pl-9 pr-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all"
                   autoComplete="email"
-                  required
                 />
               </div>
             </div>
@@ -169,18 +113,14 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
               </label>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
+                <input
                   id="login-password"
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value)
-                    if (error) setError(null)
-                  }}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-9 pr-10 text-sm font-mono"
+                  className="h-9 w-full rounded-lg border border-input bg-background pl-9 pr-10 py-1.5 text-sm font-mono text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all"
                   autoComplete="current-password"
-                  required
                 />
                 <button
                   type="button"
@@ -219,14 +159,15 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
             </div>
 
             {/* Submit Button */}
-            <Button
-              type="submit"
+            <button
+              type="button"
               id="enter-dashboard-btn"
-              className="w-full gap-2 text-xs font-semibold py-2.5 cursor-pointer shadow-xs"
+              onClick={handleEnterDashboard}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 px-4 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring select-none"
             >
-              Enter Dashboard
+              <span>Enter Dashboard</span>
               <ArrowRight className="size-4" />
-            </Button>
+            </button>
 
             {/* Divider */}
             <div className="relative flex items-center justify-center my-1">
@@ -239,16 +180,15 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
             </div>
 
             {/* Continue as Demo Instructor Button */}
-            <Button
+            <button
               type="button"
               id="continue-as-demo-btn"
-              variant="outline"
               onClick={handleContinueAsDemo}
-              className="w-full gap-2 text-xs font-semibold py-2.5 border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/5 py-2.5 px-4 text-xs font-semibold text-primary hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring select-none"
             >
               <Sparkles className="size-4 text-primary" />
-              Continue as Demo Instructor
-            </Button>
+              <span>Continue as Demo Instructor</span>
+            </button>
           </form>
 
           {/* Demo Helper Box */}

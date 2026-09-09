@@ -39,7 +39,9 @@ interface AppState {
   // Authentication
   user: AuthUser | null
   isLoggedIn: boolean
+  authenticated: boolean
   authChecked: boolean
+  authInitializing: boolean
   login: (user: AuthUser) => void
   logout: () => void
 
@@ -47,7 +49,7 @@ interface AppState {
   lectures: Lecture[]
   lecture: Lecture
   selectLecture: (id: string) => void
-  setCustomLecture: (newLecture: Lecture, source?: "synthetic" | "uploaded") => void
+  setCustomLecture: (newLecture: Lecture, source?: "synthetic" | "uploaded" | "demo") => void
 
   // Data Source & Telemetry
   dataSource: "synthetic" | "uploaded" | "demo"
@@ -96,10 +98,10 @@ interface AppState {
 const AppContext = React.createContext<AppState | null>(null)
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  // Auth state initialized from storage
+  // Auth state initialized safely from storage
   const [user, setUser] = React.useState<AuthUser | null>(null)
   const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false)
-  const [authChecked, setAuthChecked] = React.useState<boolean>(false)
+  const [authInitializing, setAuthInitializing] = React.useState<boolean>(true)
 
   React.useEffect(() => {
     try {
@@ -115,14 +117,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setUser(null)
       setIsLoggedIn(false)
     } finally {
-      setAuthChecked(true)
+      setAuthInitializing(false)
     }
   }, [])
 
   const login = React.useCallback((u: AuthUser) => {
-    saveUser(u, true)
-    setUser(u)
     setIsLoggedIn(true)
+    setUser(u)
+    try {
+      saveUser(u, true)
+    } catch {
+      // Storage access blocked or restricted
+    }
   }, [])
 
   const logout = React.useCallback(() => {
@@ -202,7 +208,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const setCustomLecture = React.useCallback(
-    (newLecture: Lecture, source: "synthetic" | "uploaded" = "synthetic") => {
+    (newLecture: Lecture, source: "synthetic" | "uploaded" | "demo" = "synthetic") => {
       setActiveLectureOverride(newLecture)
       setLectures((prev) => [newLecture, ...prev.filter((l) => l.id !== newLecture.id)])
       setLectureId(newLecture.id)
@@ -386,7 +392,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     () => ({
       user,
       isLoggedIn,
-      authChecked,
+      authenticated: isLoggedIn,
+      authChecked: !authInitializing,
+      authInitializing,
       login,
       logout,
       lectures,
@@ -420,7 +428,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [
       user,
       isLoggedIn,
-      authChecked,
+      authInitializing,
       login,
       logout,
       lectures,

@@ -104,10 +104,12 @@ function StudentDoubtContent() {
           confidence: data.confidence ?? 94,
           concept: data.concept || topic,
           segment: {
+            id: `seg-${seconds}`,
             start: seconds,
             end: seconds + 60,
             text: transcriptExcerpt,
             section: topic,
+            annotations: [],
           },
         })
         return

@@ -14,7 +14,7 @@ import { ConfidenceMeter } from "@/components/shared/confidence-meter"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { formatRange } from "@/lib/format"
+import { formatRange, formatTime } from "@/lib/format"
 import { lectureLabel, type SignalFilter } from "@/lib/data"
 import { SIGNALS } from "@/lib/signals"
 

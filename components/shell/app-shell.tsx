@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { FileSpreadsheet, Menu, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,19 +10,14 @@ import { LectureSelector } from "./lecture-selector"
 import { NAV_ITEMS } from "./nav-items"
 import { useApp } from "@/components/app-provider"
 import { LoginView } from "@/components/auth/login-view"
+import { DEMO_USER } from "@/lib/auth"
 import { cn } from "cn"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const [loggedIn, setLoggedIn] = React.useState(false)
   const pathname = usePathname()
-  const router = useRouter()
-  const { isLoggedIn, authChecked, login, dataSource } = useApp()
+  const { dataSource, login } = useApp()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
-
-  const current =
-    NAV_ITEMS.find((i) =>
-      i.href === "/" ? pathname === "/" : pathname.startsWith(i.href),
-    ) ?? NAV_ITEMS[0]
-  const isStudentView = pathname.startsWith("/student")
 
   // Keyboard Escape listener to close mobile menu
   React.useEffect(() => {
@@ -47,31 +42,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [mobileMenuOpen])
 
-  // Avoid flash before reading authentication status
-  if (!authChecked) {
-    return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-xs text-muted-foreground font-medium">Loading Lecture Lens...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // If user is not logged in, present the Login screen
-  if (!isLoggedIn) {
+  // Direct switch: If not logged in, render LoginView. When logged in, render existing dashboard!
+  if (!loggedIn) {
     return (
       <LoginView
-        onLoginSuccess={(u) => {
-          login(u)
-          if (pathname !== "/") {
-            router.push("/")
+        onLoginSuccess={() => {
+          setLoggedIn(true)
+          try {
+            login?.(DEMO_USER)
+          } catch {
+            // ignore
           }
         }}
       />
     )
   }
+
+  const currentPath = pathname || "/"
+  const current =
+    NAV_ITEMS.find((i) =>
+      i.href === "/" ? currentPath === "/" : currentPath.startsWith(i.href),
+    ) ?? NAV_ITEMS[0]
+  const isStudentView = currentPath.startsWith("/student")
 
   return (
     <div className="flex min-h-svh bg-background">
