@@ -247,17 +247,33 @@ export function EvidencePanel({
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-1">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs"
-              render={<Link href="/checklist" />}
-              nativeButton={false}
-            >
-              Open full revision checklist
-              <ArrowRight className="size-3 ml-1" />
-            </Button>
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                render={<Link href="/checklist" />}
+                nativeButton={false}
+              >
+                Revision checklist
+                <ArrowRight className="size-3 ml-1" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary"
+                render={
+                  <Link
+                    href={`/student?topic=${encodeURIComponent(hotspot.topic)}&timestamp=${formatTime(hotspot.peak)}&difficulty=${hotspot.difficulty.score}&complexity=${encodeURIComponent(hotspot.difficulty.complexity)}&excerpt=${encodeURIComponent(hotspot.interpretation)}`}
+                  />
+                }
+                nativeButton={false}
+              >
+                Open in Doubt Assistant
+              </Button>
+            </div>
             <span className="text-[11px] text-muted-foreground">
               {completed.size} of {recommendations.length} marked complete
             </span>

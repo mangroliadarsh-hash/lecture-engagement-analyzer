@@ -7,10 +7,14 @@ import {
   BookOpen,
   Brain,
   CheckCircle,
+  ChevronDown,
   Download,
+  FileSpreadsheet,
+  FileText,
   Flame,
   MessageSquare,
   Printer,
+  Sparkles,
   Users,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -24,20 +28,136 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { formatRange, formatTime } from "@/lib/format"
 import { lectureLabel } from "@/lib/data"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function ReportPage() {
   const { lecture } = useApp()
+  const [printFriendlyMode, setPrintFriendlyMode] = React.useState(false)
 
   const handlePrint = () => {
     window.print()
   }
 
-  const handleExport = () => {
-    toast.success("Executive summary report exported to PDF format.")
+  // Export to CSV: compiles metadata, hotspots, recommendations, and question clusters
+  const handleExportCsv = () => {
+    try {
+      const rows: string[] = []
+
+      // Section 1: Lecture Metadata
+      rows.push("LECTURE AUDIT REPORT - LECTURE LENS")
+      rows.push(`Lecture ID,"${lecture.id}"`)
+      rows.push(`Course,"${lecture.course}"`)
+      rows.push(`Title,"${lecture.title}"`)
+      rows.push(`Instructor,"${lecture.instructor}"`)
+      rows.push(`Duration (seconds),${lecture.durationSec}`)
+      rows.push(`Audience (enrolled students),${lecture.kpis.students}`)
+      rows.push(`Average Engagement,${lecture.kpis.avgEngagement}%`)
+      rows.push(`Rewatch Rate,${lecture.kpis.rewatchRate}%`)
+      rows.push(`Drop-off Rate,${lecture.kpis.dropoffRate}%`)
+      rows.push("")
+
+      // Section 2: Detected Hotspots
+      rows.push("DETECTED CONFUSION HOTSPOTS")
+      rows.push(
+        "Hotspot ID,Start Time,End Time,Topic,Severity,Primary Signal,Difficulty Score,Rewatch Increase %,Questions Count,Interpretation",
+      )
+      lecture.hotspots.forEach((h) => {
+        rows.push(
+          `"${h.id}","${formatTime(h.start)}","${formatTime(h.end)}","${h.topic.replace(/"/g, '""')}","${h.severity}","${h.primarySignal}",${h.difficulty.score},+${h.rewatchIncrease}%,${h.questionCount},"${h.interpretation.replace(/"/g, '""')}"`,
+        )
+      })
+      rows.push("")
+
+      // Section 3: Recommended Actions
+      rows.push("PEDAGOGICAL RECOMMENDATIONS")
+      rows.push("Recommendation ID,Priority,Timestamp,Action,Problem,Evidence")
+      lecture.recommendations.forEach((r) => {
+        rows.push(
+          `"${r.id}","${r.priority}","${formatTime(r.timestamp)}","${r.action.replace(/"/g, '""')}","${r.problem.replace(/"/g, '""')}","${r.evidence.replace(/"/g, '""')}"`,
+        )
+      })
+      rows.push("")
+
+      // Section 4: Student Question Clusters
+      rows.push("STUDENT INQUIRY THEMES")
+      rows.push("Cluster ID,Topic,Count,Start Time,End Time,Severity,Representative Question")
+      lecture.clusters.forEach((c) => {
+        rows.push(
+          `"${c.id}","${c.topic.replace(/"/g, '""')}",${c.count},"${formatTime(c.start)}","${formatTime(c.end)}","${c.severity}","${c.representative[0]?.replace(/"/g, '""') || ""}"`,
+        )
+      })
+
+      const csvContent = rows.join("\n")
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.setAttribute("href", url)
+      link.setAttribute(
+        "download",
+        `LectureLens_AuditReport_${lecture.id.replace(/[^a-zA-Z0-9_-]/g, "_")}.csv`,
+      )
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success("Executive report exported as CSV successfully.")
+    } catch {
+      toast.error("Failed to generate CSV export.")
+    }
+  }
+
+  // Export to PDF: triggers browser print-to-pdf with print styling
+  const handleExportPdf = () => {
+    toast.info("Preparing PDF preview... Select 'Save as PDF' in the destination options.")
+    setTimeout(() => {
+      window.print()
+    }, 400)
+  }
+
+  // Toggle Print-friendly View
+  const handleTogglePrintFriendly = () => {
+    setPrintFriendlyMode((prev) => !prev)
+    if (!printFriendlyMode) {
+      toast.success("Switched to Print-Friendly view mode.")
+    }
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-12">
+    <div className={`flex flex-col gap-6 pb-12 ${printFriendlyMode ? "print-friendly max-w-4xl mx-auto" : ""}`}>
+      {/* Print-friendly banner when active */}
+      {printFriendlyMode && (
+        <div className="flex items-center justify-between rounded-xl border border-primary/40 bg-primary/10 p-4 text-xs">
+          <div className="flex items-center gap-2 text-foreground font-medium">
+            <Printer className="size-4 text-primary" />
+            <span>
+              Print-Friendly View is active: navigation bars and background artifacts are minimized for clean letter-page printing.
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handlePrint} className="text-xs h-7 gap-1">
+              <Printer className="size-3" />
+              Print Now
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTogglePrintFriendly}
+              className="text-xs h-7"
+            >
+              Exit Print View
+            </Button>
+          </div>
+        </div>
+      )}
+
       <PageHeader
         eyebrow={lectureLabel(lecture)}
         title="Summary Report"
@@ -48,10 +168,56 @@ export default function ReportPage() {
               <Printer className="size-3.5" />
               Print
             </Button>
-            <Button size="sm" onClick={handleExport} className="gap-1.5 text-xs">
-              <Download className="size-3.5" />
-              Export Report
-            </Button>
+
+            {/* Export Report Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Download className="size-3.5" />
+                Export Report
+                <ChevronDown className="size-3 opacity-70 ml-0.5" />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="right" className="w-56">
+                <DropdownMenuLabel>Export Audit Report</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={handleExportPdf}>
+                  <FileText className="size-4 text-rose-500" />
+                  <div className="flex flex-col text-left">
+                    <span className="font-semibold text-foreground">Export as PDF (.pdf)</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      Formatted printable executive document
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={handleExportCsv}>
+                  <FileSpreadsheet className="size-4 text-emerald-600 dark:text-emerald-400" />
+                  <div className="flex flex-col text-left">
+                    <span className="font-semibold text-foreground">Export as CSV (.csv)</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      Raw telemetry, hotspots & recommendations
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={handleTogglePrintFriendly}>
+                  <Printer className="size-4 text-primary" />
+                  <div className="flex flex-col text-left">
+                    <span className="font-semibold text-foreground">
+                      {printFriendlyMode ? "Exit Print View" : "Print-Friendly View"}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      Monochrome layout optimized for print
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
@@ -73,20 +239,20 @@ export default function ReportPage() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 rounded-lg border bg-muted/20 p-4">
           <div>
             <span className="text-xs text-muted-foreground block font-medium">Lecture</span>
-            <span className="text-sm font-semibold text-foreground">
+            <span className="text-sm font-semibold text-foreground truncate block">
               {lecture.title}
             </span>
           </div>
           <div>
             <span className="text-xs text-muted-foreground block font-medium">Duration</span>
             <span className="text-base font-semibold tabular text-foreground">
-              58 minutes
+              {Math.floor(lecture.durationSec / 60)} minutes
             </span>
           </div>
           <div>
             <span className="text-xs text-muted-foreground block font-medium">Audience</span>
             <span className="text-base font-semibold tabular text-foreground">
-              128 students
+              {lecture.kpis.students} students
             </span>
           </div>
           <div>
@@ -119,7 +285,7 @@ export default function ReportPage() {
               <li className="flex items-start gap-2">
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-amber-500" />
                 <span>
-                  <strong>19 related questions</strong> concentrated in an 8-minute window
+                  <strong>19 related inquiries</strong> concentrated in an 8-minute window
                 </span>
               </li>
               <li className="flex items-start gap-2">
@@ -195,7 +361,7 @@ export default function ReportPage() {
         {/* Clustered Student Question Themes */}
         <Card className="flex flex-col gap-4 p-5">
           <div className="flex items-center gap-2">
-            <MessageSquare className="size-4 text-signal-questions" />
+            <MessageSquare className="size-4 text-blue-500" />
             <h3 className="text-sm font-semibold tracking-tight">
               Primary Inquiries & Confusion Clusters
             </h3>

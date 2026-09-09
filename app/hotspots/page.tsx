@@ -148,7 +148,21 @@ export default function HotspotsPage() {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-end border-t pt-3">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  render={
+                    <Link
+                      href={`/student?topic=${encodeURIComponent(h.topic)}&timestamp=${formatTime(h.peak)}&difficulty=${h.difficulty.score}&complexity=${encodeURIComponent(h.difficulty.complexity)}&excerpt=${encodeURIComponent(h.interpretation)}`}
+                    />
+                  }
+                  className="text-xs border-primary/30 text-primary hover:bg-primary/5"
+                  nativeButton={false}
+                >
+                  Test in Doubt Assistant
+                </Button>
+
                 <Button
                   variant="ghost"
                   size="sm"
