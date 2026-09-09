@@ -2,27 +2,19 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
-import { FileSpreadsheet, LogOut, Menu, Sparkles } from "lucide-react"
+import { FileSpreadsheet, Menu, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SidebarNav } from "./sidebar-nav"
 import { LectureSelector } from "./lecture-selector"
 import { NAV_ITEMS } from "./nav-items"
 import { useApp } from "@/components/app-provider"
-import { LoginView } from "@/components/auth/login-view"
-import { DEMO_USER, type AuthUser } from "@/lib/auth"
 import { cn } from "cn"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const { dataSource, login, logout, isLoggedIn, user, authInitializing } = useApp()
-  const [loggedIn, setLoggedIn] = React.useState(isLoggedIn)
+  const { dataSource, user } = useApp()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
-
-  // Keep loggedIn in sync with context isLoggedIn (handles page refresh & logout)
-  React.useEffect(() => {
-    setLoggedIn(isLoggedIn)
-  }, [isLoggedIn])
 
   // Keyboard Escape listener to close mobile menu
   React.useEffect(() => {
@@ -46,23 +38,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       document.body.style.overflow = ""
     }
   }, [mobileMenuOpen])
-
-  // Direct switch: If not logged in, render LoginView. When logged in, render existing dashboard!
-  if (!loggedIn) {
-    return (
-      <LoginView
-        setLoggedIn={setLoggedIn}
-        onLoginSuccess={(authUser, rememberMe) => {
-          setLoggedIn(true)
-          try {
-            login?.(authUser || DEMO_USER, rememberMe ?? true)
-          } catch {
-            // ignore
-          }
-        }}
-      />
-    )
-  }
 
   const currentPath = pathname || "/"
   const current =
@@ -150,29 +125,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {!isStudentView && <LectureSelector className="max-w-[16rem] sm:max-w-xs" />}
 
-          {/* Quick User & Logout in Header */}
+          {/* Instructor indicator in Header */}
           <div className="flex items-center gap-2 pl-2 border-l border-border">
-            <div className="hidden items-center gap-2 xl:flex">
+            <div className="flex items-center gap-2">
               <div className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">
                 {user?.avatar || "PR"}
               </div>
-              <span className="text-xs font-medium text-foreground max-w-[120px] truncate">
+              <span className="text-xs font-medium text-foreground max-w-[140px] truncate hidden sm:inline">
                 {user?.name || "Dr. Priya Raman"}
               </span>
             </div>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => {
-                logout()
-                setLoggedIn(false)
-              }}
-              title="Sign out"
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              aria-label="Sign out"
-            >
-              <LogOut className="size-3.5" />
-            </Button>
           </div>
         </header>
 

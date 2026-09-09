@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { cn } from "cn"
-import { LogOut, Waves, X } from "lucide-react"
+import { Waves, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { NAV_GROUPS, NAV_ITEMS } from "./nav-items"
@@ -18,15 +18,8 @@ export function SidebarNav({
   onClose?: () => void
 }) {
   const pathname = usePathname()
-  const router = useRouter()
-  const { studentQuestions, user, logout, dataSource, studentCount } = useApp()
+  const { studentQuestions, user, dataSource, studentCount } = useApp()
   const newQuestions = studentQuestions.filter((q) => q.status === "new").length
-
-  const handleLogout = () => {
-    onNavigate?.()
-    logout()
-    router.push("/")
-  }
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -109,32 +102,20 @@ export function SidebarNav({
         </div>
       </nav>
 
-      {/* User Profile & Logout */}
+      {/* Instructor Profile Card */}
       <div className="border-t border-sidebar-border p-3">
-        <div className="flex items-center justify-between gap-2 rounded-md p-1">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary shrink-0">
-              {user?.avatar || "PR"}
-            </div>
-            <div className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate text-xs font-medium text-foreground">
-                {user?.name || "Dr. Priya Raman"}
-              </span>
-              <span className="truncate text-[10px] text-muted-foreground">
-                {user?.email || "professor@demo.com"}
-              </span>
-            </div>
+        <div className="flex items-center gap-2.5 rounded-md p-1">
+          <div className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary shrink-0">
+            {user?.avatar || "PR"}
           </div>
-
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={handleLogout}
-            title="Log out"
-            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          >
-            <LogOut className="size-3.5" />
-          </Button>
+          <div className="flex min-w-0 flex-col leading-tight">
+            <span className="truncate text-xs font-medium text-foreground">
+              {user?.name || "Dr. Priya Raman"}
+            </span>
+            <span className="truncate text-[10px] text-muted-foreground">
+              {user?.title || "Lead Instructor · CS"}
+            </span>
+          </div>
         </div>
       </div>
     </div>

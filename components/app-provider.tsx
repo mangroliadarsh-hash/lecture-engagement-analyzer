@@ -15,7 +15,7 @@ import {
   type StudentQuestion,
   type TimelinePoint,
 } from "@/lib/data"
-import { getStoredUser, clearUser, saveUser, type AuthUser, DEMO_USER } from "@/lib/auth"
+import { type AuthUser, DEMO_USER } from "@/lib/auth"
 import { generateSyntheticTimeline } from "@/lib/services/engagement-generator"
 
 export type ChecklistStatus = "to-do" | "in-progress" | "completed"
@@ -98,43 +98,20 @@ interface AppState {
 const AppContext = React.createContext<AppState | null>(null)
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  // Auth state initialized safely from storage
-  const [user, setUser] = React.useState<AuthUser | null>(null)
-  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false)
-  const [authInitializing, setAuthInitializing] = React.useState<boolean>(true)
+  // Always authenticated with full instructor profile - no login gate
+  const [user, setUser] = React.useState<AuthUser>(DEMO_USER)
+  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(true)
+  const [authInitializing, setAuthInitializing] = React.useState<boolean>(false)
 
-  React.useEffect(() => {
-    try {
-      const saved = getStoredUser()
-      if (saved && saved.email) {
-        setUser(saved)
-        setIsLoggedIn(true)
-      } else {
-        setUser(null)
-        setIsLoggedIn(false)
-      }
-    } catch {
-      setUser(null)
-      setIsLoggedIn(false)
-    } finally {
-      setAuthInitializing(false)
-    }
-  }, [])
-
-  const login = React.useCallback((u: AuthUser, rememberMe: boolean = true) => {
+  const login = React.useCallback((u: AuthUser) => {
     setIsLoggedIn(true)
     setUser(u)
-    try {
-      saveUser(u, rememberMe)
-    } catch {
-      // Storage access blocked or restricted
-    }
   }, [])
 
   const logout = React.useCallback(() => {
-    clearUser()
-    setUser(null)
-    setIsLoggedIn(false)
+    // Keep instructor session active
+    setUser(DEMO_USER)
+    setIsLoggedIn(true)
   }, [])
 
   // Lectures state
